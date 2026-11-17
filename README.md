@@ -13,7 +13,7 @@
 
 ## Representation Density and Performance Drop
 We consistently observed a negative
-relationship between representation density and performance. Specifically, an increase in the representation density <span style="color:blue;">(+26%)</span> can result in a 
+relationship between representation density and performance. Specifically, an increase in the representation density <span style="color:blue;">(+26%)</span> can result in a
 performance drop <span style="color:red;">(-39%)</span> in BLEU score.
 
 <details>
@@ -33,6 +33,7 @@ To use `SignCL`, ensure you have the following dependencies installed:
 - PyTorch
 - torchvision (optional, for dataset handling)
 - Other standard libraries (e.g., random, numpy)
+- conda env: conda create -n SignCL-opt-38 python=3.8 -y
 ## Checkpoints
 Checkpoints can be found in [here](https://drive.google.com/drive/folders/1JdxKylEmoaRpyqCYtb92cYgr2eDbiGJG?usp=sharing)
 
@@ -68,23 +69,23 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 for epoch in range(num_epochs):
     for batch in data_loader:
         src_input, text_input = batch['src'], batch['text']
-        
+
         # Forward pass
         frames_feature = model.encoder(src_input)
         num_frames = frames_feature.size(1)
         text_length = len(text_input)  # Assuming text_input is the corresponding text
         margin = min(20, max(10, int(num_frames // text_length * 2.3))*2)
-        
+
         cl_loss = cl_criterion(frames_feature, margin=margin)
         original_loss = ...  # Compute your original loss here
         lambda_ = 0.01  # Weight for the contrastive loss, adjust as necessary
         total_loss = lambda_ * cl_loss + original_loss
-        
+
         # Backward pass and optimization
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
-        
+
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss.item()}")
 ```
 
@@ -103,7 +104,7 @@ bash examples/scripts.sh
 This script will execute the training and evaluation process, demonstrating how to integrate the `SignCL` loss function into the GFSLT-VLP framework. We also included our self-reproduced `results` and `log.txt` on the CSL-Daily dataset (see [link](examples/GFSLT-VLP/out/0630_GF_SignCL)).
 
 <details>
-  <summary>Click to expand results!</summary> 
+  <summary>Click to expand results!</summary>
 <figure>
   <img src="images/maintable.png" width="95%">
   <figcaption>Table 1: Enhancing GFSLT-VLP by reducing representation density on CSL-Daily test set.</figcaption>
