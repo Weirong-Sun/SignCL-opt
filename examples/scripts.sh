@@ -2,8 +2,15 @@
 # cd path/to/GFSLT-VLP
 cd examples/GFSLT-VLP
 
-# check SignCL pretrained
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch --nproc_per_node=8 --master_port=1236 --use_env train_vlp_SignCL.py --batch-size 4 --epochs 80 --opt sgd --lr 0.01 --output_dir out/0626_csl_VLP_SignCL --training-refurbish True --noise-rate 0.15 --noise-type omit_last --random-shuffle False --decoder-type LLMD --config ./configs/config_gloss_free_csl.yaml
+# check SignCL pretrained for PHOENIX-2014-T datasets
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch --nproc_per_node=8 --master_port=1236 --use_env train_vlp_SignCL.py --batch-size 4 --epochs 80 --opt sgd --lr 0.01 --output_dir out/new_VLP_SignCL --training-refurbish True --noise-rate 0.15 --noise-type omit_last --random-shuffle False --config ./configs/config_gloss_free.yaml --entity swr0311 --project SignCL-opt
+
+# check SignCL pretrained for CSL-Daily datasets
+# CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch --nproc_per_node=8 --master_port=1236 --use_env train_vlp_SignCL.py --batch-size 4 --epochs 80 --opt sgd --lr 0.01 --output_dir out/0626_csl_VLP_SignCL --training-refurbish True --noise-rate 0.15 --noise-type omit_last --random-shuffle False --decoder-type LLMD --config ./configs/config_gloss_free_csl.yaml
+
+# check best approach on PHOENIX-2014-T
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python -m torch.distributed.launch --nproc_per_node=8 --master_port=1036 --use_env train_dsl_SignCL.py --batch-size 2 --epochs 200 --opt sgd --lr 0.01 --output_dir out/new_dsl_GF_SignCL_LLMD \
+--config ./configs/config_gloss_free.yaml --finetune out/new_VLP_SignCL/best_checkpoint.pth --decoder-type LLMD
 
 
 # check best approach on CSL-Daily

@@ -10,7 +10,7 @@ data:
   img_path: /data2/wsun/datasets/PHOENIX-2014-T-release-v3/PHOENIX-2014-T/features/fullFrame-210x260px/
   max_length: 300
 training:
-  wandb: disabled # online or disabled
+  wandb: online # online or disabled
   scale_embedding: False
 model:
   transformer: /data2/wsun/pretrained_models/GFSLT-VLP-pretrained/MBart_trimmed

@@ -446,6 +446,9 @@ def config_decoder(config):
         return MBartForConditionalGeneration.from_pretrained(config['model']['transformer'],
                                                              ignore_mismatched_sizes=True, config=Path(
                 config['model']['transformer'])/'LLMD_config.json')
+        # LD 从 visual_encoder（mytran）加载：3 层编码器 + 3 层解码器。
+        # LLMD 从 transformer（MBart_trimmed）加载，LLMD_config.json 必须是 3 层编码器 + 12 层解码器：
+        # 编码器要和预训练出来的 3 层视觉编码器一致，用 12 层 config.json 会把 9 层没见过手语的文本层叠在视觉特征上。
 
 
 class gloss_free_model(nn.Module):

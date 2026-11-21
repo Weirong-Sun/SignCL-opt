@@ -1,3 +1,4 @@
+# 德国手语，对应的是Phoenix-2014T
 # *torch
 from pickletools import optimize
 # from sched import scheduler
@@ -575,8 +576,11 @@ if __name__ == '__main__':
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     os.environ["WANDB_MODE"] = config['training']['wandb'] if not args.eval else 'disabled'
-    if utils.is_main_process():
-        wandb.init(project='GF-SLT', config=config)
+    # 分布式还没初始化时，每张卡都会被当成主进程。用启动时的 RANK，只让第 0 张卡记录。
+    # entity 必须写 swr0311，否则 wandb 会记到账号的默认团队 vera-team。
+    rank = int(os.environ.get("RANK", "0"))
+    if rank == 0:
+        wandb.init(entity='swr0311', project='SignCL-opt-dsl-SLT', config=config)
         wandb.run.name = args.output_dir.split('/')[-1]
         wandb.define_metric("epoch")
         wandb.define_metric("training/*", step_metric="epoch")

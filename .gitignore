@@ -1,0 +1,19 @@
+# Python 运行时自动生成的缓存，不需要进 Git
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# wandb 的本地运行记录。曲线已经上传到网页，不需要再提交这些文件
+wandb/
+
+# out中生成的记录不上传到git中
+out/
+
+# 训练得到的模型权重。单个文件通常超过 GitHub 的 100MB 限制
+*.pth
+*.pt
+*.ckpt
+*.bin
+
+# 预训练大模型放在服务器上，不放进这个代码仓库
+examples/GFSLT-VLP/pretrain_models/

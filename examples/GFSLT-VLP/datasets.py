@@ -73,6 +73,8 @@ class S2T_Dataset(Dataset.Dataset):
         self.img_path = config['data']['img_path']
         self.phase = phase
         self.max_length = config['data']['max_length']
+        # CSL-Daily 的原始标签没有 text，图片路径也不带视频文件夹名
+        self.is_csl_daily = "CSL-Daily" in path or "CSL-Daily" in self.img_path
 
         self.list = [key for key, value in self.raw_data.items()]
 
@@ -103,12 +105,22 @@ class S2T_Dataset(Dataset.Dataset):
     def __getitem__(self, index):
         key = self.list[index]
         sample = self.raw_data[key]
-        tgt_sample = sample['text']
         length = sample['length']
-
         name_sample = sample['name']
 
-        img_sample = self.load_imgs([self.img_path + x for x in sample['imgs_path']])
+        if self.is_csl_daily:
+            # char 是按字切开的中文翻译，例如「你 们 好 ！」，去掉空格后作为译文
+            tgt_sample = sample['char'].replace(" ", "")
+            # 标签里的 imgs_path 只有 /000000.jpg，真实文件在「视频名/000000.jpg」
+            img_paths = [
+                os.path.join(self.img_path, name_sample, rel_path.lstrip("/"))
+                for rel_path in sample['imgs_path']
+            ]
+        else:
+            tgt_sample = sample['text']
+            img_paths = [self.img_path + rel_path for rel_path in sample['imgs_path']]
+
+        img_sample = self.load_imgs(img_paths)
 
         return name_sample, img_sample, tgt_sample
 

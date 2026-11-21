@@ -94,7 +94,16 @@ for epoch in range(num_epochs):
 
 ### B. Usage example for GFSLT-VLP:
 This example code was modified from [GFSLT-VLP GitHub](https://github.com/zhoubenjia/GFSLT-VLP). Please refer to their homepage to set up the environment and dataset.
-
+- To download the "pretrained_models" in GFSLT-VLP GitHub, Ensure that the filenames match those in the configuration. This file is too large to upload to GitHub, so I’ve saved it on the server.
+- `--decoder-type LLMD` uses `MBart_trimmed/LLMD_config.json`: a 3-layer encoder (8 heads, same as the pretrained visual encoder `mytran`) plus the 12-layer mBART decoder. The finetune model has about 264M parameters, matching the authors' log in `out/0630_GF_SignCL/log.txt`. Do not point LLMD at the 12-layer `config.json`: that stacks 9 text-only mBART layers on the 3 pretrained visual layers and Phoenix dev BLEU-4 stalls around 6.
+- CSL-Daily labels are kept unchanged. `datasets.py` treats a path containing `CSL-Daily` as this dataset: the translation text is `char` with spaces removed, and each frame path is `img_path/name/000000.jpg`. Phoenix-2014T still reads `text` and the original `imgs_path`.
+- Phoenix results so far (BLEU-4, single-GPU full eval with `--eval`): LLMD (3-layer encoder + 12-layer decoder), 8 GPUs × batch 2, lr 0.01 → dev 15.72 / test 16.33. sacreBLEU and NLTK corpus BLEU give the same number, so the gap to the paper (~21–22) is real. With `--decoder-type LD` (3+3 layers, loads the pretrained VLP text decoder, as in the GFSLT-VLP paper), dev BLEU-4 is already 8.1 after 2 epochs vs 0.01 for LLMD, so use LD to reproduce the paper on Phoenix.
+- Phoenix test set, best checkpoint, single GPU, `python tools/score_slt.py out/<run>/tmp_pres.txt out/<run>/tmp_refs.txt` (BLEU-1/2/3/4, ROUGE-L):
+  - `dsl_LLMD_bs8` (LLMD, 4 GPUs × batch 2, lr 0.01): 43.99 / 33.19 / 26.02 / 21.22, ROUGE-L 43.92 (dev BLEU-4 21.44)
+  - `dsl_LD_bs8` (LD, same settings): 41.72 / 31.10 / 24.22 / 19.79, ROUGE-L 41.31 (dev BLEU-4 20.69)
+  - These match the paper's GFSLT-VLP baseline row (42.13 / 32.04 / 25.62 / 21.25, ROUGE-L 42.97), not "+ SignCL into Finetuning" (48.56 / 35.04 / 27.73 / 22.16, ROUGE-L 48.17): the pretraining did not backpropagate SignCL, and the finetune SignCL weight was 0 for epochs 0–69 and at most 0.0075 afterwards.
+- `train_dsl_SignCL.py` decays the SignCL weight (`cl_decay × 0.5` every 10 epochs without a 2-point dev gain) even before the 70-epoch warmup ends, so by epoch 70 the SignCL term is ~0.06 × 0.06 and contributes almost nothing.
+- Phoenix finetune logs to the personal W&B account: `train_dsl_SignCL.py` calls `wandb.init(entity='swr0311', project='SignCL-opt-dsl-SLT')`. Only GPU rank 0 creates the run. The page is `https://wandb.ai/swr0311/SignCL-opt-dsl-SLT`. A run already started keeps its old location until training is stopped and started again.
 To execute, use the following command:
 
 ```sh
